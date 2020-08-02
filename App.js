@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 
 // the boiler plate to connect the redux to the app
-import { createStore, combineReducers } from "redux";
+import { createStore, combineReducers, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
 import { AppLoading } from "expo";
 import * as Font from "expo-font";
 import { composeWithDevTools } from "redux-devtools-extension"; // this is for the react-native-debugger
+import ReduxThunk from "redux-thunk";
 
 import productsReducer from "./store/reducers/product";
 import cartsReducer from "./store/reducers/cart";
@@ -19,7 +20,10 @@ const rootReducer = combineReducers({
   orders: ordersReducer,
 });
 
-const store = createStore(rootReducer, composeWithDevTools()); // make sure to remove the composeWithDevTools for production
+const store = createStore(
+  rootReducer,
+  composeWithDevTools(applyMiddleware(ReduxThunk))
+); // make sure to remove the composeWithDevTools for production
 
 const fetchFonts = () => {
   return Font.loadAsync({
