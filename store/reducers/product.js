@@ -16,7 +16,7 @@ export default (state = initialState, action) => {
     case CREATE_PRODUCT:
       // the ownerId is temporary
       const newProduct = new Product(
-        new Date().toString(),
+        action.productData.id,
         "u1",
         action.productData.title,
         action.productData.imageUrl,
