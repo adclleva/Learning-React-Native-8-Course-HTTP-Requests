@@ -46,6 +46,19 @@ const ProductOverviewScreen = (props) => {
     loadProducts();
   }, [dispatch, loadProducts]);
 
+  // this will be a navigation listener when we navigate through the drawer
+  useEffect(() => {
+    // willFocus: emitted when screen comes into focus
+    const willFocusSub = props.navigation.addListener("willFocus", () => {
+      loadProducts();
+    });
+
+    // this will clean up the listener
+    return () => {
+      willFocusSub.remove();
+    };
+  }, [loadProducts]);
+
   const selectItemHandler = (id, title) => {
     props.navigation.navigate("ProductDetail", {
       productId: id,
