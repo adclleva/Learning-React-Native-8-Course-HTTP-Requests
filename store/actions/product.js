@@ -64,9 +64,19 @@ export const fetchProducts = () => {
 };
 
 export const deleteProduct = (productId) => {
-  return {
-    type: DELETE_PRODUCT,
-    productId: productId,
+  return async (dispatch) => {
+    await fetch(
+      `https://rn-shop-app-1b7bc.firebaseio.com/products/${productId}.json`,
+      {
+        // we can also do PUT as well to completely overwrite the data
+        method: "DELETE",
+      }
+    );
+
+    dispatch({
+      type: DELETE_PRODUCT,
+      productId: productId,
+    });
   };
 };
 
@@ -97,8 +107,6 @@ export const createProduct = (title, description, imageUrl, price) => {
     // this is also an async task
     const responseData = await response.json();
 
-    console.log("responseData", responseData);
-
     dispatch({
       type: CREATE_PRODUCT,
       productData: {
@@ -113,13 +121,31 @@ export const createProduct = (title, description, imageUrl, price) => {
 };
 
 export const updateProduct = (id, title, description, imageUrl) => {
-  return {
-    type: UPDATE_PRODUCT,
-    productId: id,
-    productData: {
-      title,
-      description,
-      imageUrl,
-    },
+  return async (dispatch) => {
+    await fetch(
+      `https://rn-shop-app-1b7bc.firebaseio.com/products/${id}.json`,
+      {
+        method: "PATCH", // we can also do PUT as well to completely overwrite the data
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // firebase will only change the fields of the body
+        body: JSON.stringify({
+          title,
+          description,
+          imageUrl,
+        }),
+      }
+    );
+
+    dispatch({
+      type: UPDATE_PRODUCT,
+      productId: id,
+      productData: {
+        title,
+        description,
+        imageUrl,
+      },
+    });
   };
 };
