@@ -1,11 +1,12 @@
-import React, { useEffect, useCallback, useReducer } from "react";
+import React, { useState, useEffect, useCallback, useReducer } from "react";
 import {
-  StyleSheet,
-  View,
-  ScrollView,
-  Platform,
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 
 import { HeaderButtons, Item } from "react-navigation-header-buttons";
@@ -13,6 +14,7 @@ import HeaderButton from "../../components/UI/HeaderButton";
 import { useSelector, useDispatch } from "react-redux";
 import * as productActions from "../../store/actions/product";
 import Input from "../../components/UI/Input";
+import Colors from "../../constants/Colors";
 
 /**
  * We create this outside the component to avoid recreation to improve performance
@@ -60,6 +62,9 @@ const formReducer = (state, action) => {
 };
 
 const EditProductScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+
   // this could be null if the user is just creating with no params passed down
   const productId = props.navigation.getParam("productId");
 
@@ -93,13 +98,21 @@ const EditProductScreen = (props) => {
     formIsValid: editedProduct ? true : false,
   });
 
+  // this will handle if an error is caused
+  useEffect(() => {
+    if (error) {
+      Alert.alert("An error occurred!", error, [{ text: "Okay" }]);
+    }
+  }, [error]);
+
   /**
    * we use this useEffect and useCallback pattern to pass the submitHandler
    * to our params, the useCallback makes sure the function isn't recreated
    * so it wont be entering an infinite loop
    * We check validity when submitting but not for every input itself, it will be within the component
+   * we turn this into an async function so we can use the await
    */
-  const submitHandler = useCallback(() => {
+  const submitHandler = useCallback(async () => {
     // if the title is not valid, we stop continuing the function execution
     if (!formState.formIsValid) {
       Alert.alert("Wrong input!", "Please check the errors in the form.", [
@@ -107,30 +120,45 @@ const EditProductScreen = (props) => {
       ]);
       return;
     }
-    // this will check if we are editing or creating by checking editedProduct is not undefined
-    if (editedProduct) {
-      dispatch(
-        productActions.updateProduct(
-          productId,
-          // these have been refactored to use the formState from the reducer
-          formState.inputValues.title,
-          formState.inputValues.description,
-          formState.inputValues.imageUrl
-        )
-      );
-    } else {
-      // this case, we are creating
-      dispatch(
-        productActions.createProduct(
-          formState.inputValues.title,
-          formState.inputValues.description,
-          formState.inputValues.imageUrl,
-          +formState.inputValues.price // this is the shorthand way of converting a string to a number
-        )
-      );
-    }
 
-    props.navigation.goBack();
+    // to reset the error state
+    setError(null);
+    // to start the loading state while updating or creating a product
+    setIsLoading(true);
+
+    // we do this try catch block to catch the errors that would occur
+    try {
+      if (editedProduct) {
+        await dispatch(
+          productActions.updateProduct(
+            productId,
+            // these have been refactored to use the formState from the reducer
+            formState.inputValues.title,
+            formState.inputValues.description,
+            formState.inputValues.imageUrl
+          )
+        );
+      } else {
+        // this case, we are creating
+        await dispatch(
+          productActions.createProduct(
+            formState.inputValues.title,
+            formState.inputValues.description,
+            formState.inputValues.imageUrl,
+            +formState.inputValues.price // this is the shorthand way of converting a string to a number
+          )
+        );
+      }
+
+      // we navigate back only if the dispatch actions were done successfully
+      props.navigation.goBack();
+    } catch (error) {
+      setError(error.message);
+    }
+    // this will check if we are editing or creating by checking editedProduct is not undefined
+
+    setIsLoading(false);
+
     /**
      * we need to make sure to add the dependencies because the useCallback function
      * won't be recreated when the user enters in the data or when any of these changes
@@ -167,6 +195,14 @@ const EditProductScreen = (props) => {
     },
     [dispatchFormState]
   );
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -270,5 +306,10 @@ EditProductScreen.navigationOptions = (navData) => {
 const styles = StyleSheet.create({
   form: {
     margin: 20,
+  },
+  centered: {
+    flex: 1,
+    alignContent: "center",
+    justifyContent: "center",
   },
 });
