@@ -1,14 +1,24 @@
-import React from "react";
-import { StyleSheet, Text, View, FlatList, Button } from "react-native";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Button,
+  ActivityIndicator,
+} from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import Colors from "../../constants/Colors";
 import CartItem from "../../components/shop/CartItem";
 import * as cartActions from "../../store/actions/cart";
 import * as ordersActions from "../../store/actions/orders";
 import Card from "../../components/UI/Card";
+import { isLoading } from "expo-font";
 
 const CartScreen = () => {
   const dispatch = useDispatch();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const cartTotalAmount = useSelector((state) => state.cart.totalAmount);
 
@@ -31,6 +41,14 @@ const CartScreen = () => {
     ); // we use the sort function to ensure that the products stay in place when being removed or added
   });
 
+  // we create this handler in order to make this an async function
+  const sendOrderHandler = async () => {
+    setIsLoading(true);
+    // addOrder would return a promise because of the refactoring we did when we implemented the thunk, thus we use an await
+    await dispatch(ordersActions.addOrder(cartItems, cartTotalAmount));
+    setIsLoading(false);
+  };
+
   return (
     <View style={styles.screen}>
       <Card style={styles.summary}>
@@ -45,14 +63,16 @@ const CartScreen = () => {
             }
           </Text>
         </Text>
-        <Button
-          color={Colors.accent}
-          title="Order Now"
-          disabled={cartItems.length === 0} // this checks if the cart is empty
-          onPress={() => {
-            dispatch(ordersActions.addOrder(cartItems, cartTotalAmount));
-          }}
-        />
+        {isLoading ? (
+          <ActivityIndicator size="small" color={Colors.primary} />
+        ) : (
+          <Button
+            color={Colors.accent}
+            title="Order Now"
+            disabled={cartItems.length === 0} // this checks if the cart is empty
+            onPress={sendOrderHandler}
+          />
+        )}
       </Card>
       <FlatList
         data={cartItems}
