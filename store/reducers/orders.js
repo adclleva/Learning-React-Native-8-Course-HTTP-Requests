@@ -10,10 +10,10 @@ export default (state = initialState, action) => {
     case ADD_ORDER:
       // we'll be using the date as the psuedo dummy unique id, we'll be using the server to create new ones
       const newOrder = new Order(
-        new Date().toString(),
+        action.orderData.id,
         action.orderData.items,
         action.orderData.amount,
-        new Date()
+        action.orderData.date
       );
 
       return {
