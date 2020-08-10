@@ -19,6 +19,7 @@ import * as productActions from "../../store/actions/product";
 
 const ProductOverviewScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
   // it retrieves the state as input and returns whatever we want to get from there
@@ -33,17 +34,21 @@ const ProductOverviewScreen = (props) => {
    */
   const loadProducts = useCallback(async () => {
     setError(null);
-    setIsLoading(true);
+    setIsRefreshing(true);
     try {
       await dispatch(productActions.fetchProducts()); // we can do an await here since it returns a promise
     } catch (error) {
       setError(error.message);
     }
-    setIsLoading(false);
+    setIsRefreshing(false);
   }, [dispatch, setError, setIsLoading]);
 
   useEffect(() => {
-    loadProducts();
+    setIsLoading(true);
+    loadProducts().then(() => {
+      // we use the because loadProducts returns a promise because it's using async
+      setIsLoading(false);
+    });
   }, [dispatch, loadProducts]);
 
   // this will be a navigation listener when we navigate through the drawer
@@ -100,6 +105,8 @@ const ProductOverviewScreen = (props) => {
 
   return (
     <FlatList
+      onRefresh={loadProducts} // this function runs when you pull down on the FlatList
+      refreshing={isRefreshing} // the refresh props allows us when to know that we are done, in this case we can use isLoading
       data={products} // this is the array that we'll be using
       keyExtractor={(item) => item.id} // this is for older versions of React
       renderItem={(itemData) => {
