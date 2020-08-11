@@ -1,5 +1,8 @@
 import React from "react"; // we need to import react since we are rendering a component with the JSX syntax
-import { createAppContainer } from "react-navigation";
+import {
+  createAppContainer,
+  createSwitchNavigator, // this is usually used for authentication since we don't want to go back when just logged in
+} from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { createDrawerNavigator } from "react-navigation-drawer"; // this will be for the SideDrawer
 import { Platform } from "react-native";
@@ -13,6 +16,7 @@ import EditProductScreen from "../screens/user/EditProductScreen";
 
 import Colors from "../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import AuthenticationScreen from "../screens/user/AuthenticationScreen";
 
 const defaultNavigationOptions = {
   headerStyle: {
@@ -102,4 +106,18 @@ const ShopNavigator = createDrawerNavigator(
   }
 );
 
-export default createAppContainer(ShopNavigator); // we need to make sure to wrap our the navigation that we'll be using
+const AuthenticationNavigator = createStackNavigator(
+  {
+    Authentication: AuthenticationScreen,
+  },
+  {
+    defaultNavigationOptions: defaultNavigationOptions,
+  }
+);
+
+const MainNavigator = createSwitchNavigator({
+  Authentication: AuthenticationNavigator,
+  Shop: ShopNavigator,
+});
+
+export default createAppContainer(MainNavigator); // we need to make sure to wrap our the navigation that we'll be using
