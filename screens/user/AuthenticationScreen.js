@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback } from "react";
+import React, { useState, useReducer, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -58,15 +58,27 @@ const formReducer = (state, action) => {
 };
 
 const AuthenticationScreen = (props) => {
+  // this will determine wether we are in login or signup mode
+  const [isSignup, setIsSignup] = useState(false);
+
   const dispatch = useDispatch();
 
-  const signUpHandler = () => {
-    dispatch(
-      authenticationActions.signup(
+  const authenticationHandler = () => {
+    let action;
+
+    if (isSignup) {
+      action = authenticationActions.signup(
         formState.inputValues.email,
         formState.inputValues.password
-      )
-    );
+      );
+    } else {
+      action = authenticationActions.login(
+        formState.inputValues.email,
+        formState.inputValues.password
+      );
+    }
+
+    dispatch(action);
   };
 
   // this is initialized and similar to the useReducer in EditProductScreen
@@ -93,6 +105,7 @@ const AuthenticationScreen = (props) => {
       /**
        * we are forwarding the input information that we are getting from the component
        * we dispatch this reducer to handle our complex local state
+       * we are getting some validation within the textChangeHandler within the Input UI component
        */
 
       dispatchFormState({
@@ -115,6 +128,14 @@ const AuthenticationScreen = (props) => {
         <Card style={styles.authContainer}>
           <ScrollView>
             <Input
+              /**
+               * we refactored the onInputChange prop because it will re-create a
+               * function binding on ever render cycle
+               * thus we need to have an id passed down instead
+               * because the useCallback is not having an effect
+               * to avoid an infinite rendering cycle whenever we use an anonymous
+               * function or binding
+               */
               id="email"
               label="E-Mail"
               keyboardType="email-address"
@@ -122,6 +143,7 @@ const AuthenticationScreen = (props) => {
               email
               autoCapitalize="none"
               errorText="Please enter a valid email address"
+              // we remove the binding to prevent an infinite cycle since the arguments are coming from the component
               onInputChange={inputChangeHandler}
               initialValue=""
             />
@@ -139,16 +161,19 @@ const AuthenticationScreen = (props) => {
             />
             <View style={styles.buttonContainer}>
               <Button
-                title="Login"
+                title={isSignup ? "Sign Up" : "Login"}
                 color={Colors.primary}
-                onPress={signUpHandler} // this function is what we point at to execute the function
+                onPress={authenticationHandler} // this function is what we point at to execute the function
               />
             </View>
             <View style={styles.buttonContainer}>
               <Button
-                title="Switch to Sign Up"
+                title={`Switch to ${isSignup ? "Login" : "Sign Up"}`}
                 color={Colors.accent}
-                onPress={() => {}}
+                onPress={() => {
+                  // this is the proper way to switch the previous state from false to true and vice versa
+                  setIsSignup((prevState) => !prevState);
+                }}
               />
             </View>
           </ScrollView>
