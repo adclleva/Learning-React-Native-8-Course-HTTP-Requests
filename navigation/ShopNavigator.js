@@ -7,16 +7,17 @@ import { createStackNavigator } from "react-navigation-stack";
 import { createDrawerNavigator } from "react-navigation-drawer"; // this will be for the SideDrawer
 import { Platform } from "react-native";
 
-import ProductsOverViewScreen from "../screens/shop/ProductOverviewScreen";
-import ProductDetailScreen from "../screens/shop/ProductDetailScreen";
+import AuthenticationScreen from "../screens/user/AuthenticationScreen";
 import CartScreen from "../screens/shop/CartScreen";
-import OrdersScreen from "../screens/shop/OrdersScreen";
-import UserProductsScreen from "../screens/user/UserProductsScreen";
 import EditProductScreen from "../screens/user/EditProductScreen";
+import OrdersScreen from "../screens/shop/OrdersScreen";
+import ProductDetailScreen from "../screens/shop/ProductDetailScreen";
+import ProductsOverViewScreen from "../screens/shop/ProductOverviewScreen";
+import StartupScreen from "../screens/StartupScreen";
+import UserProductsScreen from "../screens/user/UserProductsScreen";
 
 import Colors from "../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
-import AuthenticationScreen from "../screens/user/AuthenticationScreen";
 
 const defaultNavigationOptions = {
   headerStyle: {
@@ -116,6 +117,7 @@ const AuthenticationNavigator = createStackNavigator(
 );
 
 const MainNavigator = createSwitchNavigator({
+  Startup: StartupScreen, // this will be the first thing that will be loaded
   Authentication: AuthenticationNavigator,
   Shop: ShopNavigator,
 });

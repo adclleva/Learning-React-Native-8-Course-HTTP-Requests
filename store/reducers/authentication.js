@@ -1,4 +1,4 @@
-import { LOGIN, SIGNUP } from "../actions/authentication";
+import { LOGIN, SIGNUP, AUTHENTICATE } from "../actions/authentication";
 
 const initialState = {
   token: null,
@@ -8,12 +8,18 @@ const initialState = {
 export default (state = initialState, action) => {
   switch (action.type) {
     // we need to store the token when logging in or signing up
-    case LOGIN:
-      return {
-        token: action.token,
-        userId: action.userId,
-      };
-    case SIGNUP:
+    //* This is what we used before the authentication action
+    // case LOGIN:
+    //   return {
+    //     token: action.token,
+    //     userId: action.userId,
+    //   };
+    // case SIGNUP:
+    //   return {
+    //     token: action.token,
+    //     userId: action.userId,
+    //   };
+    case AUTHENTICATE:
       return {
         token: action.token,
         userId: action.userId,
