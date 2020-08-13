@@ -11,13 +11,16 @@ import ReduxThunk from "redux-thunk";
 import productsReducer from "./store/reducers/product";
 import cartsReducer from "./store/reducers/cart";
 import ordersReducer from "./store/reducers/orders";
+import authenticationReducer from "./store/reducers/authentication";
 
 import ShopNavigator from "./navigation/ShopNavigator";
 
+// this connects the redux global state to the app
 const rootReducer = combineReducers({
   products: productsReducer,
   cart: cartsReducer,
   orders: ordersReducer,
+  authentication: authenticationReducer,
 });
 
 const store = createStore(

@@ -64,9 +64,11 @@ export const fetchProducts = () => {
 };
 
 export const deleteProduct = (productId) => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const token = getState().authentication.token;
+
     const response = await fetch(
-      `https://rn-shop-app-1b7bc.firebaseio.com/products/${productId}.json`,
+      `https://rn-shop-app-1b7bc.firebaseio.com/products/${productId}.json?auth=${token}`,
       {
         // we can also do PUT as well to completely overwrite the data
         method: "DELETE",
@@ -88,13 +90,14 @@ export const deleteProduct = (productId) => {
 // we can create the product within the action/reducer side
 export const createProduct = (title, description, imageUrl, price) => {
   // we'll use the es6 async await for promises
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const token = getState().authentication.token;
     /**
      *  this is a redux-thunk pattern where we can run any async code
      * we add .json to the request because that's a firebase specific thing
      */
     const response = await fetch(
-      "https://rn-shop-app-1b7bc.firebaseio.com/products.json",
+      `https://rn-shop-app-1b7bc.firebaseio.com/products.json?auth=${token}`,
       {
         method: "POST",
         headers: {
@@ -126,9 +129,16 @@ export const createProduct = (title, description, imageUrl, price) => {
 };
 
 export const updateProduct = (id, title, description, imageUrl) => {
-  return async (dispatch) => {
+  /**
+   * the second argument we pass in is a function which allows us to get
+   * the redux global state thanks to the thunk middleware
+   */
+  return async (dispatch, getState) => {
+    const token = getState().authentication.token;
+
     const response = await fetch(
-      `https://rn-shop-app-1b7bc.firebaseio.com/products/${id}.json`,
+      // the ?access_token= at the end of the url authenticates with an access token
+      `https://rn-shop-app-1b7bc.firebaseio.com/products/${id}.json?auth=${token}`,
       {
         method: "PATCH", // we can also do PUT as well to completely overwrite the data
         headers: {

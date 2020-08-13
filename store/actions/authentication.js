@@ -39,7 +39,11 @@ export const signup = (email, password) => {
 
     console.log("responseData", responseData);
 
-    dispatch({ type: SIGNUP });
+    dispatch({
+      type: SIGNUP,
+      token: responseData.idToken,
+      userId: responseData.localId, // localId is the user id
+    });
   };
 };
 
@@ -83,6 +87,10 @@ export const login = (email, password) => {
 
     console.log("responseData", responseData);
 
-    dispatch({ type: LOGIN });
+    dispatch({
+      type: LOGIN,
+      token: responseData.idToken,
+      userId: responseData.localId, // localId is the user id
+    });
   };
 };

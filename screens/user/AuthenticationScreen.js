@@ -89,10 +89,11 @@ const AuthenticationScreen = (props) => {
     setIsLoading(true);
     try {
       await dispatch(action);
+      props.navigation.navigate("Shop");
     } catch (error) {
       setError(error.message); // we make sure to have the error message be set to the state
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   // this is initialized and similar to the useReducer in EditProductScreen
