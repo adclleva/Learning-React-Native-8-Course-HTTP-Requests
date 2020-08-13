@@ -4,15 +4,16 @@ export const ADD_ORDER = "ADD_ORDER";
 export const SET_ORDERS = "SET_ORDERS";
 
 export const fetchOrders = () => {
-  return async (dispatch) => {
-    // this is using redux thunk
+  // this is using redux thunk
+  return async (dispatch, getState) => {
+    const userId = getState().authentication.userId;
 
     /**
      * we use a try catch block to handle the fetching errors
      */
     try {
       const response = await fetch(
-        "https://rn-shop-app-1b7bc.firebaseio.com/orders/u1.json", // we are using the u1 to be a hard coded value of the user
+        `https://rn-shop-app-1b7bc.firebaseio.com/orders/${userId}.json`, // we are using the u1 to be a hard coded value of the user
         {
           /**
            * it is default as a GET request
@@ -54,10 +55,12 @@ export const fetchOrders = () => {
 };
 
 export const addOrder = (cartItems, totalAmount) => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const token = getState().authentication.token;
+    const userId = getState().authentication.userId;
     const date = new Date(); // we create this so we can have the same time stamp to the backend and to the local app
     const response = await fetch(
-      "https://rn-shop-app-1b7bc.firebaseio.com/orders/u1.json", // we'll be hitting the orders node with our user id
+      `https://rn-shop-app-1b7bc.firebaseio.com/orders/${userId}.json?auth=${token}`, // we'll be hitting the orders node with our user id
       {
         method: "POST",
         headers: {

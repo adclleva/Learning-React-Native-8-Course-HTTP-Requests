@@ -7,7 +7,8 @@ export const SET_PRODUCTS = "SET_PRODUCTS";
 
 // we'll be fetching products from the api
 export const fetchProducts = () => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const userId = getState().authentication.userId; // this will be used to map the products
     /**
      * we use a try catch block to handle the fetching errors
      */
@@ -46,8 +47,8 @@ export const fetchProducts = () => {
         // we look through the response object and create a new product
         loadedProducts.push(
           new Product(
-            key,
-            "u1",
+            key, // this is typically the id
+            responseData[key].ownerId,
             responseData[key].title,
             responseData[key].imageUrl,
             responseData[key].description,
@@ -55,7 +56,15 @@ export const fetchProducts = () => {
           )
         );
       }
-      dispatch({ type: SET_PRODUCTS, products: loadedProducts });
+      console.log("loadedProducts", loadedProducts);
+      dispatch({
+        type: SET_PRODUCTS,
+        products: loadedProducts,
+        userProducts: loadedProducts.filter(
+          // this will only show the products that belong to the user
+          (product) => product.ownerId === userId
+        ),
+      });
     } catch (error) {
       // send to custom analytics server
       throw error;
@@ -92,6 +101,7 @@ export const createProduct = (title, description, imageUrl, price) => {
   // we'll use the es6 async await for promises
   return async (dispatch, getState) => {
     const token = getState().authentication.token;
+    const userId = getState().authentication.userId;
     /**
      *  this is a redux-thunk pattern where we can run any async code
      * we add .json to the request because that's a firebase specific thing
@@ -108,6 +118,7 @@ export const createProduct = (title, description, imageUrl, price) => {
           description,
           imageUrl,
           price,
+          ownerId: userId, // now we are mapping new products with the userId as well
         }),
       }
     );
@@ -123,6 +134,7 @@ export const createProduct = (title, description, imageUrl, price) => {
         description,
         imageUrl,
         price,
+        ownerId: userId, // to make sure the product is connected with the owner
       },
     });
   };
