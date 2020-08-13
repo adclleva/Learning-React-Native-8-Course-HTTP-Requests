@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useCallback } from "react";
+import React, { useState, useReducer, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Button,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useDispatch } from "react-redux";
@@ -58,27 +60,39 @@ const formReducer = (state, action) => {
 };
 
 const AuthenticationScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(); // have the error be undefined initially
+
   // this will determine wether we are in login or signup mode
   const [isSignup, setIsSignup] = useState(false);
 
   const dispatch = useDispatch();
 
-  const authenticationHandler = () => {
+  const authenticationHandler = async () => {
     let action;
 
     if (isSignup) {
+      // these actions return a promise
       action = authenticationActions.signup(
         formState.inputValues.email,
         formState.inputValues.password
       );
     } else {
+      // this action returns a promise
       action = authenticationActions.login(
         formState.inputValues.email,
         formState.inputValues.password
       );
     }
 
-    dispatch(action);
+    setError(null); // set the error to start as null before dispatching
+    setIsLoading(true);
+    try {
+      await dispatch(action);
+    } catch (error) {
+      setError(error.message); // we make sure to have the error message be set to the state
+    }
+    setIsLoading(false);
   };
 
   // this is initialized and similar to the useReducer in EditProductScreen
@@ -94,6 +108,13 @@ const AuthenticationScreen = (props) => {
     },
     formIsValid: false,
   });
+
+  useEffect(() => {
+    if (error) {
+      // this checks the state if there's an error
+      Alert.alert("An Error Occurred!", error, [{ text: "Okay" }]);
+    }
+  }, [error]); // checks whenever error changes
 
   /**
    * this will handle the text input changing and will use the useCallback to avoid rec-creating the function
@@ -160,11 +181,15 @@ const AuthenticationScreen = (props) => {
               initialValue=""
             />
             <View style={styles.buttonContainer}>
-              <Button
-                title={isSignup ? "Sign Up" : "Login"}
-                color={Colors.primary}
-                onPress={authenticationHandler} // this function is what we point at to execute the function
-              />
+              {isLoading ? (
+                <ActivityIndicator size="small" color={Colors.primary} />
+              ) : (
+                <Button
+                  title={isSignup ? "Sign Up" : "Login"}
+                  color={Colors.primary}
+                  onPress={authenticationHandler} // this function is what we point at to execute the function
+                />
+              )}
             </View>
             <View style={styles.buttonContainer}>
               <Button

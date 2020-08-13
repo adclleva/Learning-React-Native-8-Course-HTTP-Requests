@@ -22,7 +22,17 @@ export const signup = (email, password) => {
     );
 
     if (!response.ok) {
-      throw new Error("Something went wrong!");
+      const errorResponseData = await response.json();
+      const errorId = errorResponseData.error.message;
+
+      let message = "Something went wrong!";
+
+      if (errorId === "EMAIL_EXISTS") {
+        message = "This email exists already!";
+      }
+
+      console.log("errorResponseData", errorResponseData);
+      throw new Error(message);
     }
 
     const responseData = await response.json(); // this will unpack the response body and put it in json format
@@ -54,7 +64,19 @@ export const login = (email, password) => {
     );
 
     if (!response.ok) {
-      throw new Error("Something went wrong!");
+      const errorResponseData = await response.json();
+      const errorId = errorResponseData.error.message;
+
+      let message = "Something went wrong!";
+
+      if (errorId === "EMAIL_NOT_FOUND") {
+        message = "This email could not be found!";
+      } else if (errorId === "INVALID_PASSWORD") {
+        message = "The password is invalid!";
+      }
+
+      console.log("errorResponseData", errorResponseData);
+      throw new Error(message);
     }
 
     const responseData = await response.json(); // this will unpack the response body and put it in json format
