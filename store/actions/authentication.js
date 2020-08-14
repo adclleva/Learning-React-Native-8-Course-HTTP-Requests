@@ -5,6 +5,7 @@ import { AsyncStorage } from "react-native";
 // export const SIGNUP = "SIGNUP";
 // export const LOGIN = "LOGIN";
 export const AUTHENTICATE = "AUTHENTICATE";
+export const LOGOUT = "LOGOUT";
 
 export const authenticate = (userId, token) => {
   return {
@@ -145,6 +146,12 @@ export const login = (email, password) => {
       responseData.localId,
       expirationDate
     );
+  };
+};
+
+export const logout = () => {
+  return {
+    type: LOGOUT,
   };
 };
 

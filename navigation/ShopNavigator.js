@@ -3,9 +3,13 @@ import {
   createAppContainer,
   createSwitchNavigator, // this is usually used for authentication since we don't want to go back when just logged in
 } from "react-navigation";
+import {
+  createDrawerNavigator,
+  DrawerNavigatorItems,
+} from "react-navigation-drawer"; // this will be for the SideDrawer
 import { createStackNavigator } from "react-navigation-stack";
-import { createDrawerNavigator } from "react-navigation-drawer"; // this will be for the SideDrawer
-import { Platform } from "react-native";
+import { Platform, SafeAreaView, Button, View } from "react-native";
+import { useDispatch } from "react-redux";
 
 import AuthenticationScreen from "../screens/user/AuthenticationScreen";
 import CartScreen from "../screens/shop/CartScreen";
@@ -15,6 +19,8 @@ import ProductDetailScreen from "../screens/shop/ProductDetailScreen";
 import ProductsOverViewScreen from "../screens/shop/ProductOverviewScreen";
 import StartupScreen from "../screens/StartupScreen";
 import UserProductsScreen from "../screens/user/UserProductsScreen";
+
+import * as authenticationActions from "../store/actions/authentication";
 
 import Colors from "../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -103,6 +109,27 @@ const ShopNavigator = createDrawerNavigator(
   {
     contentOptions: {
       activeTintColor: Colors.primary,
+    },
+    // this allows us to add in our own content for the side drawer, where in the end it's a react component
+    contentComponent: (props) => {
+      const dispatch = useDispatch();
+
+      return (
+        <View style={{ flex: 1, paddingTop: 20 }}>
+          <SafeAreaView forceInset={{ top: "always", horizontal: "never" }}>
+            <DrawerNavigatorItems {...props} />
+            <Button
+              title="Logout"
+              color={Colors.primary}
+              onPress={() => {
+                dispatch(authenticationActions.logout());
+                // after we log off we go to the Authentication of login screen
+                props.navigation.navigate("Authentication");
+              }}
+            />
+          </SafeAreaView>
+        </View>
+      );
     },
   }
 );
