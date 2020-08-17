@@ -38,9 +38,19 @@ const StartupScreen = (props) => {
         return;
       }
 
+      /**
+       * we need to calculate the expiration time  with the expirationDate which is the future
+       * minus the current time, which is new Date.getTime(), where getTime() will be in milliseconds
+       * thus future minus present in milliseconds
+       */
+      // future - present
+      const expirationTime = expirationDate.getTime() - new Date().getTime();
+
       props.navigation.navigate("Shop");
       // after the token has passed, we need to lock the user in to get the auto-login feature in
-      dispatch(authenticationActions.authenticate(userId, token));
+      dispatch(
+        authenticationActions.authenticate(userId, token, expirationTime)
+      );
     };
 
     tryLogin();

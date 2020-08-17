@@ -117,14 +117,19 @@ const ShopNavigator = createDrawerNavigator(
       return (
         <View style={{ flex: 1, paddingTop: 20 }}>
           <SafeAreaView forceInset={{ top: "always", horizontal: "never" }}>
-            <DrawerNavigatorItems {...props} />
+            <DrawerNavigatorItems
+              // DrawerNavigatorItems is the new DrawerItems
+              {...props}
+            />
             <Button
               title="Logout"
               color={Colors.primary}
               onPress={() => {
                 dispatch(authenticationActions.logout());
+
                 // after we log off we go to the Authentication of login screen
-                props.navigation.navigate("Authentication");
+                // we take this out because if there isn't a token, the app automatically logs out
+                // props.navigation.navigate("Authentication");
               }}
             />
           </SafeAreaView>

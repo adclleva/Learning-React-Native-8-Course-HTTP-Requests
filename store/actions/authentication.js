@@ -1,5 +1,6 @@
 // this can save data to the device for ios and android that would persists on relaunching of the app
 import { AsyncStorage } from "react-native";
+import { Item } from "react-navigation-header-buttons";
 
 //* These two has been refactored with the Authenticate action
 // export const SIGNUP = "SIGNUP";
@@ -7,11 +8,18 @@ import { AsyncStorage } from "react-native";
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
 
-export const authenticate = (userId, token) => {
-  return {
-    type: AUTHENTICATE,
-    userId: userId,
-    token: token,
+let timer;
+
+// the expiryTime comes from firebase
+export const authenticate = (userId, token, expiryTime) => {
+  return (dispatch) => {
+    // we also need to set the logout timer
+    dispatch(setLogoutTimer(expiryTime));
+    dispatch({
+      type: AUTHENTICATE,
+      userId: userId,
+      token: token,
+    });
   };
 };
 
@@ -60,7 +68,13 @@ export const signup = (email, password) => {
     //   userId: responseData.localId, // localId is the user id
     // });
 
-    dispatch(authenticate(responseData.localId, responseData.idToken));
+    dispatch(
+      authenticate(
+        responseData.localId,
+        responseData.idToken,
+        parseInt(responseData.expiresIn) * 1000 // we need the integer to be in milliseconds
+      )
+    );
 
     /**
      * this is to check the expiration of the token
@@ -128,7 +142,13 @@ export const login = (email, password) => {
     //   userId: responseData.localId, // localId is the user id
     // });
 
-    dispatch(authenticate(responseData.localId, responseData.idToken));
+    dispatch(
+      authenticate(
+        responseData.localId,
+        responseData.idToken,
+        parseInt(responseData.expiresIn) * 1000 // we need the integer to be in milliseconds
+      )
+    );
 
     /**
      * this is to check the expiration of the token
@@ -150,8 +170,30 @@ export const login = (email, password) => {
 };
 
 export const logout = () => {
-  return {
-    type: LOGOUT,
+  return async (dispatch) => {
+    // we need to clear the timer when we logout
+    clearLogoutTimer();
+
+    // we need to remove the data stored in the device that we stored in the userData identifer
+    await AsyncStorage.removeItem("userData"); // this returns a promise thus we need to use thunk
+    dispatch({ type: LOGOUT });
+  };
+};
+
+const clearLogoutTimer = () => {
+  if (timer) {
+    // The clearTimeout() method clears a timer set with the setTimeout() method
+    clearTimeout(timer);
+  }
+};
+
+// we are assuming that we are passing the data in milliseconds
+const setLogoutTimer = (expirationTime) => {
+  return async (dispatch) => {
+    // the dispatch action runs right after the timer runs out
+    timer = setTimeout(() => {
+      dispatch(logout());
+    }, expirationTime);
   };
 };
 

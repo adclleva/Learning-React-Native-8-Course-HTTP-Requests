@@ -13,7 +13,7 @@ import cartsReducer from "./store/reducers/cart";
 import ordersReducer from "./store/reducers/orders";
 import authenticationReducer from "./store/reducers/authentication";
 
-import ShopNavigator from "./navigation/ShopNavigator";
+import NavigationContainer from "./navigation/NavigationContainer";
 
 // this connects the redux global state to the app
 const rootReducer = combineReducers({
@@ -48,9 +48,11 @@ export default function App() {
       />
     );
   }
+
+  // we created this NavigationContainer so that the ShopNavigator can have access to the redux store.
   return (
     <Provider store={store}>
-      <ShopNavigator />
+      <NavigationContainer />
     </Provider>
   );
 }
